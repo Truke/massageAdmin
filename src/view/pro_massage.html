@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>民信</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <link href="css/bootstrap.min.css?v=3.4.0" rel="stylesheet">
+    <link href="css/font-awesome.min.css?v=4.3.0" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css?v=3.2.0" rel="stylesheet">
+    <link href="css/plugins/jqgrid/ui.jqgrid.css?0820" rel="stylesheet">
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-12">
+                <!--查询条件-->
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title bt_min_h40">
+                        <h5>条件查询</h5>
+                    </div>
+                    <div class="ibox-content clearfix text-center">
+                        <form role="form" class="form-inline" id="searchForm">
+                            <div class="search-content-box clearfix">
+                                <div class="form-group col-sm-3">
+                                    <label class="font-noraml">业务类型:</label>
+                                    <select id="typeInput" class="form-control" style="width: 50%">
+                                        <option value="">请选择</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-sm-3">
+                                    <label class="font-noraml">产品名称:</label>
+                                    <input id="titleInput" class="form-control">
+                                </div>
+                                <div class="form-group col-sm-3">
+                                    <label class="font-noraml">创建时间:</label>
+                                    <input type="text" id="createtime" class="laydate-icon form-control layer-date"  value="">
+                                </div>
+                            </div>
+                            <div class="center-block search-action-box">
+                                <button type="submit" class="btn btn-primary" id="search">查询</button>
+                                <button type="reset" class="btn btn-white" id="reset">重置</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="toolbar space-15">
+                    <a href="javascript:;" class="btn btn-primary" id="addpro">新增产品</a>
+                    <a href="javascript:;" class="btn btn-white" id="copypro">复制并新增</a>
+                </div>
+                <div class="jqGrid_wrapper_box">
+                    <div class="jqGrid_wrapper">
+                        <table id="table_list_1"></table>
+                        <div id="pager_list_1"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 全局js -->
+    <script src="js/jquery-2.1.1.min.js"></script>
+    <script src="js/plugins/layer/laydate/laydate.js"></script>
+    <!-- jqGrid -->
+    <script src="js/plugins/jqgrid/i18n/grid.locale-cn.js?0820"></script>
+    <script src="js/plugins/jqgrid/jquery.jqGrid.min.js?0820"></script>
+    <!-- table -->
+    <script>
+    $(document).ready(function () {
+        //日期控件
+        var createtime = {
+            elem: '#createtime',
+            format: 'YYYY/MM/DD hh:mm:ss',
+            max: laydate.now(), //最大日期
+            istime: true,
+            istoday: false,
+            choose: function (datas) {
+                
+            }
+        };
+        laydate(createtime);
+
+        var mydata = [
+            {
+                id: "1",
+                type: "房贷",
+                title: "房e贷",
+                description: "",
+                num: 4,
+                ps:'这是一段备注',
+                actionman:'小明',
+                create_time: "2017/6/12 12:00:00",
+            },
+            {
+                id: "2",
+                type: "车贷",
+                title: "车e贷",
+                description: "",
+                num: 4,
+                ps:'这是一段备注',
+                actionman:'小红',
+                create_time: "2017/6/12 12:00:00",
+            }
+        ];
+        
+        $("#table_list_1").jqGrid({
+            styleUI: 'Bootstrap',
+            data: mydata,
+            datatype: "local",
+            height: 355,
+            autowidth: true,
+            shrinkToFit: true,
+            rowNum: 14,
+            rowList: [10, 20, 30],
+            colNames: ['操作', '业务类型', '产品名称', '产品描述', '方案数量', '备注', '操作人','创建时间'],
+            colModel: [
+                {
+                    name: 'action',
+                    width: 150,
+                    fixed: true,
+                    title: false,
+                    classes:'contract-td-visible',
+                    formatter:function(cellvalue, options, rowObject){
+                        var detail = "", menu = [];
+                        menu.push("<a title='创建产品方案' class='btn btn-white btn-outline' href=''>创建</a>");
+                        menu.push("<a title='查看产品配置' class='btn btn-white btn-outline' href=''>查看</a>");
+                        menu.push("<a title='变更产品配置' class='btn btn-white btn-outline' href=''>变更</a>");
+                        menu.push("<a title='日志' class='btn btn-white btn-outline' href=''>日志</a>");
+                        if(menu.length<3){
+                            detail=["<div class='btn-group contract-btnbox'>",menu[0],menu[1],"</div>"].join('');
+                        }else{
+                            detail=["<div class='btn-group contract-btnbox'>",menu[0],menu[1],"<div title='更多操作' class='btn btn-white btn-outline contarct-hidebtn'><i class='fa fa-angle-double-right'></i><div class='btn-group dropdown-menu'>",menu[2],menu[3],"</div></div></div>"].join('');
+                        }
+                        return detail;
+                    }
+                },
+                {
+                    name: 'type'
+                },
+                {
+                    name: 'title'
+                },
+                {
+                    name: 'description'
+                },
+                {
+                    name: 'num'
+                },
+                {
+                    name: 'ps',
+                },
+                {
+                    name: 'actionman'
+                },
+                {
+                    name: 'create_time'
+                }
+            ],
+            pager: "#pager_list_1",
+            multiselect : true,
+            onSelectRow: function(id,state) {
+                var ids = $("#table_list_1").jqGrid('getGridParam','selarrrow');
+                console.log(ids,id,state)
+            },
+            onSelectAll: function(rowids,state){
+                console.log(rowids,state)
+            }
+        })
+        initGridWidth();
+        function initGridWidth(){
+            var width = $('#table_list_1').parents('.jqGrid_wrapper').width();
+            $('#table_list_1').setGridWidth(width);
+        }
+        $(window).bind('resize', initGridWidth);
+        //绑定事件
+        $(document).on('submit','#searchForm',function(){
+            alert('查询')
+            //do something
+            return false;
+        }).on('click','#copypro',function(e){
+            var e = e || window.event,
+                dom = e.target || e.srcElement,
+                ids = $("#table_list_1").jqGrid('getGridParam','selarrrow');
+            if(ids.length !== 1){
+                window.top.swal({
+                    title: '请选择一条数据',
+                    type: 'warning'
+                })
+            }else{
+                alert('执行复制新增，当前选中id为：'+ids)
+            }
+        })
+    })
+</script>
+</body>
+</html>

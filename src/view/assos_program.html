@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>民信</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <link href="css/bootstrap.min.css?v=3.4.0" rel="stylesheet">
+    <link href="css/font-awesome.min.css?v=4.3.0" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css?v=3.2.0" rel="stylesheet">
+    <link href="css/plugins/jqgrid/ui.jqgrid.css?0820" rel="stylesheet">
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-12">
+                <!--查询条件-->
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title bt_min_h40">
+                        <h5>条件查询</h5>
+                    </div>
+                    <div class="ibox-content clearfix text-center">
+                        <form role="form" class="form-inline" id="searchForm">
+                            <div class="search-content-box clearfix">
+                                <div class="form-group col-sm-3">
+                                    <label class="font-noraml">业务类型:</label>
+                                    <input id="typeInput" class="form-control">
+                                </div>
+                                <div class="form-group col-sm-3">
+                                    <label class="font-noraml">产品名称:</label>
+                                    <input id="titleInput" class="form-control">
+                                </div>
+                                <div class="form-group col-sm-3">
+                                    <label class="font-noraml">版本号:</label>
+                                    <input id="versionInput" class="form-control">
+                                </div>
+                                <div class="form-group col-sm-3">
+                                    <label class="font-noraml">状态:</label>
+                                    <select id="statusInput" class="form-control" style="width: 50%">
+                                        <option value="">请选择</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="center-block search-action-box">
+                                <button type="submit" class="btn btn-primary" id="search">查询</button>
+                                <button type="reset" class="btn btn-white" id="reset">重置</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="jqGrid_wrapper_box">
+                    <div class="jqGrid_wrapper">
+                        <table id="table_list_1"></table>
+                        <div id="pager_list_1"></div>
+                    </div>
+                </div>
+				<div class="bottomtoolbar text-center m-t">
+                    <a class="btn btn-white" id="cancelbtn" href="javascript:;">取 消</a>
+                    <a class="btn btn-primary" id="surebtn" href="javascript:;">确 定</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 全局js -->
+    <script src="js/jquery-2.1.1.min.js"></script>
+    <!-- jqGrid -->
+    <script src="js/plugins/jqgrid/i18n/grid.locale-cn.js?0820"></script>
+    <script src="js/plugins/jqgrid/jquery.jqGrid.min.js?0820"></script>
+    <!-- table -->
+    <script>
+    $(document).ready(function () {
+        var mydata = [
+            {
+                id: "1",
+                type: "房贷",
+                title: "房e贷",
+                version: "v1.0.0",
+                status: "未发布",
+                description: "",
+                create_time: "2017/6/12 12:00:00",
+                public_time: "----",
+                stop_time: "----",
+            },
+            {
+                id: "2",
+                type: "车贷",
+                title: "车e贷",
+                version: "v1.0.0",
+                status: "未发布",
+                description: "",
+                create_time: "2017/6/12 12:00:00",
+                public_time: "----",
+                stop_time: "----",
+            }
+        ];
+        
+        $("#table_list_1").jqGrid({
+            styleUI: 'Bootstrap',
+            data: mydata,
+            datatype: "local",
+            height: 355,
+            autowidth: true,
+            shrinkToFit: true,
+            rowNum: 14,
+            rowList: [10, 20, 30],
+            colNames: ['序号', '产品类型', '产品名称', '版本号', '状态', '产品描述', '创建时间', '发布时间', '停用时间'],
+            colModel: [
+                {
+                    name: 'id',
+                    index: 'id',
+                    width: 60,
+                    sorttype: "int"
+                },
+                {
+                    name: 'type'
+                },
+                {
+                    name: 'title'
+                },
+                {
+                	name: 'version'
+                },
+                {
+                	name: 'status'
+                },
+                {
+                    name: 'description'
+                },
+                {
+                    name: 'create_time'
+                },
+                {
+                    name: 'public_time'
+                },
+                {
+                    name: 'stop_time'
+                },
+            ],
+            pager: "#pager_list_1",
+            multiselect : true,
+            onSelectRow: function(id,state) {
+                var ids = $("#table_list_1").jqGrid('getGridParam','selarrrow');
+                console.log(ids,id,state)
+            },
+            onSelectAll: function(rowids,state){
+                console.log(rowids,state)
+            }
+        })
+        initGridWidth();
+        function initGridWidth(){
+            var width = $('#table_list_1').parents('.jqGrid_wrapper').width();
+            $('#table_list_1').setGridWidth(width);
+        }
+        $(window).bind('resize', initGridWidth);
+        //绑定事件
+        $(document).on('submit','#searchForm',function(){
+            alert('查询')
+            //do something
+            return false;
+        })
+    })
+</script>
+</body>
+</html>

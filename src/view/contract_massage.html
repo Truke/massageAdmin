@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>民信</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <link href="css/bootstrap.min.css?v=3.4.0" rel="stylesheet">
+    <link href="css/font-awesome.min.css?v=4.3.0" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css?v=3.2.0" rel="stylesheet">
+    <link href="css/plugins/jqgrid/ui.jqgrid.css?0820" rel="stylesheet">
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-12">
+                <!--查询条件-->
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title bt_min_h40">
+                        <h5>条件查询</h5>
+                    </div>
+                    <div class="ibox-content clearfix text-center">
+                        <form role="form" class="form-inline" id="searchForm">
+                            <div class="search-content-box clearfix">
+                                <div class="form-group col-sm-3">
+                                    <label class="font-noraml">合同名称:</label>
+                                    <input id="typeInput" class="form-control">
+                                </div>
+                                <div class="form-group col-sm-3">
+                                    <label class="font-noraml">合同状态:</label>
+                                    <select id="statusInput" class="form-control" style="width: 50%">
+                                        <option value="">请选择</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="center-block search-action-box">
+                                <button type="submit" class="btn btn-primary" id="search">查询</button>
+                                <button type="reset" class="btn btn-white" id="reset">重置</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="toolbar space-15">
+                    <a href="javascript:;" class="btn btn-primary" id="addcontract">新增合同</a>
+                    <a href="javascript:;" class="btn btn-white" id="copycontract">复制并新增</a>
+                </div>
+                <div class="jqGrid_wrapper_box">
+                    <div class="jqGrid_wrapper">
+                        <table id="table_list_1"></table>
+                        <div id="pager_list_1"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="proModal" tabindex="-1" role="dialog" aria-labelledby="proModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">产品方案明细</h4>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+                <table id="protable"></table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 全局js -->
+    <script src="js/jquery-2.1.1.min.js"></script>
+    <script src="js/bootstrap.min.js?v=3.4.0"></script>
+    <!-- jqGrid -->
+    <script src="js/plugins/jqgrid/i18n/grid.locale-cn.js?0820"></script>
+    <script src="js/plugins/jqgrid/jquery.jqGrid.min.js?0820"></script>
+    <!-- table -->
+    <script>
+    $(document).ready(function () {
+        var mydata = [
+            {
+                id: "1",
+                title: "房e贷合同",
+                version: "v1.0",
+                status: '已生效',
+                num: 4,
+                create_time: "2017/6/12 12:00:00",
+                stop_time: "----",
+                actionman: ''
+            },
+            {
+                id: "2",
+                title: "车e贷",
+                version: "v1.0",
+                status: '已生效',
+                num: 4,
+                create_time: "2017/6/12 12:00:00",
+                stop_time: "----",
+                actionman: ''
+            }
+        ];
+        
+        $("#table_list_1").jqGrid({
+            styleUI: 'Bootstrap',
+            data: mydata,
+            datatype: "local",
+            height: 355,
+            autowidth: true,
+            shrinkToFit: true,
+            rowNum: 14,
+            rowList: [10, 20, 30],
+            colNames: ['操作', '合同名称', '合同版本号', '合同状态', '产品方案数量', '创建时间', '停用时间', '操作人'],
+            colModel: [
+                {
+                    name: 'action',
+                    width: 180,
+                    fixed: true,
+                    title: false,
+                    classes:'contract-td-visible',
+                    formatter:function(cellvalue, options, rowObject){
+                        var detail = "", menu = [];
+                        menu.push("<a title='查看' class='btn btn-white btn-outline' href=''>查看</a>");
+                        menu.push("<a title='关联产品' class='btn btn-white btn-outline' href=''>关联产品</a>");
+                        menu.push("<a title='删除' class='btn btn-white btn-outline' href=''>删除</a>");
+                        menu.push("<a title='停用' class='btn btn-white btn-outline' href=''>停用</a>");
+                        if(menu.length<3){
+                            detail=["<div class='btn-group contract-btnbox'>",menu[0],menu[1],"</div>"].join('');
+                        }else{
+                            detail=["<div class='btn-group contract-btnbox'>",menu[0],menu[1],"<div title='更多操作' class='btn btn-white btn-outline contarct-hidebtn'><i class='fa fa-angle-double-right'></i><div class='btn-group dropdown-menu'>",menu[2],menu[3],"</div></div></div>"].join('');
+                        }
+                        return detail;
+                    }
+                },
+                {
+                    name: 'title'
+                },
+                {
+                    name: 'version'
+                },
+                {
+                    name: 'status'
+                },
+                {
+                    name: 'num',
+                    title: false,
+                    formatter:function(cellvalue,options,rowObject){
+                    	return '<a class="seePros" data-id="'+rowObject.id+'"">'+rowObject.num+'</a>'
+                    }
+                },
+                {
+                    name: 'create_time'
+                },
+                {
+                	name: 'stop_time'
+                },
+                {
+                	name: 'actionman'
+                }
+            ],
+            pager: "#pager_list_1",
+            multiselect : true,
+            onSelectRow: function(id,state) {
+                var ids = $("#table_list_1").jqGrid('getGridParam','selarrrow');
+                console.log(ids,id,state)
+            },
+            onSelectAll: function(rowids,state){
+                console.log(rowids,state)
+            }
+        })
+        initGridWidth();
+        function initGridWidth(){
+            var width = $('#table_list_1').parents('.jqGrid_wrapper').width();
+            $('#table_list_1').setGridWidth(width);
+        }
+        $(window).bind('resize', initGridWidth);
+        //绑定事件
+        $(document).on('submit','#searchForm',function(){
+            alert('查询')
+            //do something
+            return false;
+        }).on('click','#copycontract',function(e){
+            var e = e || window.event,
+                dom = e.target || e.srcElement,
+                ids = $("#table_list_1").jqGrid('getGridParam','selarrrow');
+            if(ids.length !== 1){
+                window.top.swal({
+                    title: '请选择一条数据',
+                    type: 'warning'
+                })
+            }else{
+                alert('执行复制新增，当前选中id为：'+ids)
+            }
+        }).on('click','.seePros',function(){
+            var id = $(this).data('id');
+            $('#proModal').attr('data-id',id).modal();
+        }).on('shown.bs.modal','#proModal',function(e){
+            alert(e.target.dataset.id)
+            $('#protable').jqGrid({
+            	styleUI: 'Bootstrap',
+            	autowidth: true,
+	            shrinkToFit: true,
+	            colNames:['序号', '产品名称', '产品方案描述', '方案版本号'],
+	            colModel:[
+	            	{
+	            		name:'id',
+	            	},
+	            	{
+	            		name: 'title'
+	            	},
+	            	{
+	            		name: 'description'
+	            	},
+	            	{
+	            		name: 'version'
+	            	}
+	            ]
+            })
+        })
+    })
+</script>
+</body>
+</html>

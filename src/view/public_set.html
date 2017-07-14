@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>民信</title>
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <link href="css/bootstrap.min.css?v=3.4.0" rel="stylesheet">
+  <link href="css/font-awesome.min.css?v=4.3.0" rel="stylesheet">
+  <link href="css/style.css?v=3.2.0" rel="stylesheet">
+  <style>
+  .col-sm-3{
+    padding-right: 5px;
+    padding-left: 5px;
+  }
+  .ibox{
+    box-shadow: 0 0 20px #ccc;
+  }
+  .ibox-content{
+    min-height: 520px;
+  }
+  .form-inline .form-group {
+    margin-bottom: 10px;
+    width: 100%;
+  }
+  .form-inline label {
+    min-width: 8em;
+  }
+  .help-block{
+    color:#aaa;
+  }
+  .showother{
+    position: absolute;
+    right: 0;
+    top:50%;
+    margin-top: -20px;
+  }
+  .table .btn{
+    margin-left: 0;
+  }
+  .form-text{
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 12px;
+    padding: 1px 10px;
+    height: 34px;
+    line-height: 34px;
+  }
+  .form-text.plxs{
+    padding: 0px 6px;
+  }
+  </style>
+</head>
+
+<body class="gray-bg">
+  <div id="app" class="wrapper wrapper-content">
+    <div class="row">
+      <div class="col-sm-12" v-if="!editStatus">
+        <div class="col-sm-3">
+          <div class="ibox float-e-margins">
+            <div class="ibox-title">
+              <h5>基本信息</h5>
+              <a href="javascript:;" class="btn btn-white pull-right btn-xs" @click="editStatus=!editStatus"><i class="fa fa-edit"></i> 修改</a>
+            </div>
+            <div class="ibox-content">
+              <div class="form-inline">
+                <div class="form-group">
+                  <label class="font-noraml">业务类型:</label>
+                  <div class="form-text" v-text="base.businesstypetext"></div>
+                </div>
+                <div class="form-group">
+                  <label class="font-noraml">产品名称:</label>
+                  <input type="text" name="productname" class="form-control" style="width: 50%" v-model="base.title">
+                </div>
+                <div class="form-group">
+                  <label class="font-noraml">产品描述:</label>
+                  <input type="text" name="productdescription" class="form-control" style="width: 50%" v-model="base.description">
+                </div>
+                <div class="form-group">
+                  <label class="font-noraml">版本号:</label>
+                  <input type="text" name="productversion" class="form-control" style="width: 50%" v-model="base.version" readonly>
+                </div>
+                <div class="form-group">
+                  <label class="font-noraml">发布时间:</label>
+                  <input type="text" id="productpublictime" name="productpublictime" class="form-control laydate-icon form-control layer-date" style="width: 50%" v-model="base.publictime">
+                </div>
+                <div class="form-group">
+                  <label class="font-noraml">下架时间:</label>
+                  <input type="text" id="productdowntime" name="productdowntime" class="form-control laydate-icon form-control layer-date" style="width: 50%" v-model="base.downtime">
+                </div>
+                <div class="form-group">
+                  <label class="font-noraml">期限:</label>
+                  <input type="text" name="productterm" class="form-control" style="width: 50%" v-model="base.term"> 期
+                </div>
+                <div class="form-group">
+                  <label class="font-noraml">还款方式:</label>
+                  <div class="form-text" v-text="base.repaymenttypetext"></div>
+                </div>
+                <div class="form-group">
+                  <label class="font-noraml">单期长度:</label>
+                  <div class="form-text plxs" v-text="base.singlelength" style="width: 25%"></div>
+                  <div class="form-text" v-text="base.singlelengthtypetext" style="width: 25%"></div>
+                </div>
+                <div class="form-group">
+                  <label class="font-noraml" style="vertical-align: top;">备注:</label>
+                  <div class="form-text" v-text="base.ps" style="width: 50%;line-height: 1.45;overflow: auto;height: 100px;"></div>
+                </div>
+              </div>
+              <a href="javascript:;" class="showother btn btn-white" v-show="!showother" @click="showother=true"><i class="fa fa-chevron-right"></i></a>
+            </div>
+          </div>
+        </div>
+        <div :class="showother?'col-sm-3':'col-sm-3 hide'">
+          <div class="ibox float-e-margins">
+            <div class="ibox-title">
+              <h5>放款、还款日规则</h5>
+            </div>
+            <div class="ibox-content">
+              <div class="form-inline">
+                <h4>放款规则</h4>
+                <div class="form-group">
+                  <label class="font-noraml">放款金额:</label>
+                  <div class="form-text" v-text="loansrepay.loansarttypetext"></div>
+                </div>
+                <h4>还款日规则</h4>
+                <div class="form-group">
+                  <label class="font-noraml" for="fixed"><input id="fixed" type="radio" name="repaydayradio" value="1" v-model="loansrepay.repaydayradio" disabled> 固定</label>
+                  <label class="font-noraml" for="any"><input id="any" type="radio" name="repaydayradio" value="2" v-model="loansrepay.repaydayradio" disabled> 任意</label>
+                </div>
+                <table class="table table-bordered" v-if="loansrepay.repaydayradio==='1'">
+                  <thead>
+                    <tr>
+                      <th width="50%">计息日</th>
+                      <th width="50%">还款日</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="item,index in loansrepay.trarray">
+                      <td><div class="form-text plxs" v-text="item.startday" style="width: 40%"></div> - <div class="form-text plxs" v-text="item.endday" style="width: 40%"></div></td>
+                      <td>
+                        <div class="form-text" v-text="item.text" style="width: 50%"></div>
+                        <div class="form-text plxs" v-text="item.day" style="width: 20%"></div>
+                        日
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div class="form-group" v-if="loansrepay.repaydayradio==='2'">
+                  <label class="font-noraml">还款日:</label>
+                  <div class="form-text" v-text="loansrepay.interesttypetext"></div>
+                </div>
+                <div class="form-group" v-if="loansrepay.repaydayradio==='2'">
+                  <label class="font-noraml" for="interestestcheckbox" style="width: 100%"><input id="interestestcheckbox" type="checkbox" name="interestestcheckbox" v-model="loansrepay.interestest" disabled> 计息日为1号，还款日为每月月底</label>
+                </div>
+                <div class="form-group"  v-if="loansrepay.repaydayradio!==''">
+                  <label class="font-noraml" for="extension"><input id="extension" type="checkbox" name="extensioncheckbox" v-model="loansrepay.extension" disabled> 遇节假日顺延</label>
+                </div>
+                <div class="form-group"  v-if="loansrepay.repaydayradio!==''">
+                  <p class="help-block">注：还款日为每月31日，遇到天数不足31天的月份，还款日为当月的最后一天</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div :class="showother?'col-sm-3':'col-sm-3 hide'">
+          <div class="ibox float-e-margins">
+            <div class="ibox-title">
+              <h5>服务费、逾期费用规则</h5>
+            </div>
+            <div class="ibox-content">
+              <div class="form-inline">
+                <h4>服务费规则</h4>
+                <div class="form-group">
+                  <label class="font-noraml" for="preperiod"><input id="preperiod" type="checkbox" name="servicemoneyrule" v-model="serviceoverdue.preperiod" @change="preperiodchange($event)" disabled> 前期服务费:</label>
+                  <div class="form-text" v-text="serviceoverdue.preperiodtypetext"></div>
+                </div>
+                <div class="form-group">
+                  <label class="font-noraml" for="staging"><input id="staging" type="checkbox" name="servicemoneyrule" v-model="serviceoverdue.staging" @change="stagingchange($event)" disabled> 分期服务费:</label>
+                  <div class="form-text" v-text="serviceoverdue.stagingtypetext"></div>
+                </div>
+                <h4>逾期收费规则</h4>
+                <div class="form-group">
+                  <label class="font-noraml" for="perin"><input id="perin" type="checkbox" name="perincheckbox" v-model="serviceoverdue.perin" @change="perinchange($event)" disabled> 罚息</label>
+                  <label class="font-noraml" for="beofcon"><input id="beofcon" type="checkbox" name="overduecheckbox" v-model="serviceoverdue.beofcon" @change="beofconchange($event)" disabled> 违约金</label>
+                </div>
+                <div class="form-group" v-if="serviceoverdue.perin">
+                  <label class="font-noraml">罚息:</label>
+                  <div class="form-text" v-text="serviceoverdue.perintypetext"></div>
+                </div>
+                <div class="form-group" v-if="serviceoverdue.perin">
+                  <label class="font-noraml">收取频率:</label>
+                  <div class="form-text" v-text="serviceoverdue.perinturntext"></div>
+                </div>
+                <div class="form-group" v-if="serviceoverdue.beofcon">
+                  <label class="font-noraml">违约金:</label>
+                  <div class="form-text" v-text="serviceoverdue.beofcontypetext"></div>
+                </div>
+                <div class="form-group" v-if="serviceoverdue.beofcon">
+                  <label class="font-noraml">收取频率:</label>
+                  <div class="form-text" v-text="serviceoverdue.beofconturntext"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div :class="showother?'col-sm-3':'col-sm-3 hide'">
+          <div class="ibox float-e-margins">
+            <div class="ibox-title">
+              <h5>提前结清、还款顺序规则</h5>
+            </div>
+            <div class="ibox-content">
+              <div class="form-inline">
+                <h4>提前结清规则</h4>
+                <div class="form-group">
+                  <label class="font-noraml" style="line-height: 34px">提前结清金额:</label>
+                  <div class="form-text" v-text="advancerepayturn.advancetypetext"></div>
+                </div>
+                <div class="form-group" v-if="advancerepayturn.advbeofcon">
+                  <label class="font-noraml">违约金:</label>
+                  <div class="form-text" v-text="advancerepayturn.advbeofcontypetext"></div>
+                </div>
+                <div class="form-group" v-if="advancerepayturn.advreturn">
+                  <label class="font-noraml">退还费用:</label>
+                  <div class="form-text" v-text="advancerepayturn.advreturntypetext"></div>
+                </div>
+                <h4>还款顺序</h4>
+                <div class="form-group">
+                  <div class="form-text" v-text="advancerepayturn.repaymentturntext" style="width: 100%"></div>
+                </div>
+              </div>
+              <a href="javascript:;" class="showother btn btn-white" v-show="showother" @click="showother=false"><i class="fa fa-chevron-left"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-12" v-if="editStatus">
+        <div class="col-sm-3">
+          <div class="ibox float-e-margins">
+            <div class="ibox-title">
+              <h5>基本信息</h5>
+              <a href="javascript:;" class="btn btn-white pull-right btn-xs disabled"><i class="fa fa-edit"></i> 修改</a>
+            </div>
+            <div class="ibox-content">
+              <div class="form-inline">
+                <div class="form-group">
+                  <label class="font-noraml">业务类型:</label>
+                  <select name="businesstype" class="form-control" style="width: 50%" @change="selectChange($event,'base','businesstype')">
+                    <option value="">请选择</option>
+                    <option v-for="item,index in base.businesstypearray" :value="item.value" v-text="item.text" :selected="item.value===base.businesstype"></option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="font-noraml">产品名称:</label>
+                  <input type="text" name="productname" class="form-control" style="width: 50%" v-model="base.title">
+                </div>
+                <div class="form-group">
+                  <label class="font-noraml">产品描述:</label>
+                  <input type="text" name="productdescription" class="form-control" style="width: 50%" v-model="base.description">
+                </div>
+                <div class="form-group">
+                  <label class="font-noraml">版本号:</label>
+                  <input type="text" name="productversion" class="form-control" style="width: 50%" v-model="base.version" readonly>
+                </div>
+                <div class="form-group">
+                  <label class="font-noraml">发布时间:</label>
+                  <input type="text" id="productpublictime" name="productpublictime" class="form-control laydate-icon form-control layer-date" style="width: 50%" v-model="base.publictime">
+                </div>
+                <div class="form-group">
+                  <label class="font-noraml">下架时间:</label>
+                  <input type="text" id="productdowntime" name="productdowntime" class="form-control laydate-icon form-control layer-date" style="width: 50%" v-model="base.downtime">
+                </div>
+                <div class="form-group">
+                  <label class="font-noraml">期限:</label>
+                  <input type="text" name="productterm" class="form-control" style="width: 50%" v-model="base.term"> 期
+                </div>
+                <div class="form-group">
+                  <label class="font-noraml">还款方式:</label>
+                  <select name="repaymenttype" class="form-control" style="width: 50%" @change="selectChange($event,'base','repaymenttype')">
+                    <option value="">请选择</option>
+                    <option v-for="item,index in base.repaymenttypearray" :value="item.value" v-text="item.text" :selected="item.value===base.repaymenttype"></option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="font-noraml">单期长度:</label>
+                  <input type="text" name="singlelength" class="form-control" style="width: 25%" v-model="base.singlelength">
+                  <select name="singlelengthtype" class="form-control" style="width: 25%" @change="selectChange($event,'base','singlelengthtype')">
+                    <option value="">请选择</option>
+                    <option v-for="item,index in base.singlelengthtypearray" :value="item.value" v-text="item.text" :selected="item.value===base.singlelengthtype"></option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="font-noraml" style="vertical-align: top;">备注:</label>
+                  <textarea class="form-control" name="ps" style="width: 50%;padding: 0px 9px;height: 100px;" v-model="base.ps"></textarea>
+                </div>
+              </div>
+              <a href="javascript:;" class="showother btn btn-white" v-show="!showother" @click="showother=true"><i class="fa fa-chevron-right"></i></a>
+            </div>
+          </div>
+        </div>
+        <div :class="showother?'col-sm-3':'col-sm-3 hide'">
+          <div class="ibox float-e-margins">
+            <div class="ibox-title">
+              <h5>放款、还款日规则</h5>
+            </div>
+            <div class="ibox-content">
+              <div class="form-inline">
+                <h4>放款规则</h4>
+                <div class="form-group">
+                  <label class="font-noraml">放款金额:</label>
+                  <select name="loansart" class="form-control" style="width: 50%" @change="selectChange($event,'loansrepay','loansarttype')">
+                    <option value="">请选择</option>
+                    <option v-for="item,index in loansrepay.loansarttypearray" :value="item.value" v-text="item.text" :selected="item.value===loansrepay.loansarttype"></option>
+                  </select>
+                </div>
+                <h4>还款日规则</h4>
+                <div class="form-group">
+                  <label class="font-noraml" for="fixed"><input id="fixed" type="radio" name="repaydayradio" value="1" v-model="loansrepay.repaydayradio"> 固定</label>
+                  <label class="font-noraml" for="any"><input id="any" type="radio" name="repaydayradio" value="2" v-model="loansrepay.repaydayradio"> 任意</label>
+                </div>
+                <table class="table table-bordered" v-if="loansrepay.repaydayradio==='1'">
+                  <thead>
+                    <tr>
+                      <th width="30%">计息日</th>
+                      <th width="45%">还款日</th>
+                      <th width="25%">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="item,index in loansrepay.trarray">
+                      <td><input type="text" class="form-control" style="width: 40%" v-model="item.startday"> - <input type="text" class="form-control" style="width: 40%" v-model="item.endday"></td>
+                      <td>
+                        <select class="form-control" style="width: 50%" @change="trtypechange($event,index)">
+                          <option value="">请选择</option>
+                          <option value="1" :selected="item.type==='1'">本月</option>
+                          <option value="2" :selected="item.type==='2'">次月</option>
+                        </select>
+                        <input type="text" class="form-control" style="width: 20%" v-model="item.day">
+                        日
+                      </td>
+                      <td>
+                        <a class="btn btn-white btn-xs" href="javascript:;" @click="addTrClick"><i class="fa fa-plus"></i></a>
+                        <a class="btn btn-white btn-xs" href="javascript:;" @click="delTrClick(index)" v-if="loansrepay.trarray.length>1"><i class="fa fa-minus"></i></a>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div class="form-group" v-if="loansrepay.repaydayradio==='2'">
+                  <label class="font-noraml">还款日:</label>
+                  <select name="interestselect" class="form-control" style="width: 50%" @change="selectChange($event,'loansrepay','interesttype')">
+                    <option value="">请选择</option>
+                    <option v-for="item,index in loansrepay.interesttypearray" :value="item.value" v-text="item.text" :selected="item.value===loansrepay.interesttype"></option>
+                  </select>
+                </div>
+                <div class="form-group" v-if="loansrepay.repaydayradio==='2'">
+                  <label class="font-noraml" for="interestestcheckbox" style="width: 100%"><input id="interestestcheckbox" type="checkbox" name="interestestcheckbox" v-model="loansrepay.interestest"> 计息日为1号，还款日为每月月底</label>
+                </div>
+                <div class="form-group"  v-if="loansrepay.repaydayradio!==''">
+                  <label class="font-noraml" for="extension"><input id="extension" type="checkbox" name="extensioncheckbox" v-model="loansrepay.extension"> 遇节假日顺延</label>
+                </div>
+                <div class="form-group"  v-if="loansrepay.repaydayradio!==''">
+                  <p class="help-block">注：还款日为每月31日，遇到天数不足31天的月份，还款日为当月的最后一天</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div :class="showother?'col-sm-3':'col-sm-3 hide'">
+          <div class="ibox float-e-margins">
+            <div class="ibox-title">
+              <h5>服务费、逾期费用规则</h5>
+            </div>
+            <div class="ibox-content">
+              <div class="form-inline">
+                <h4>服务费规则</h4>
+                <div class="form-group">
+                  <label class="font-noraml" for="preperiod"><input id="preperiod" type="checkbox" name="servicemoneyrule" v-model="serviceoverdue.preperiod" @change="preperiodchange($event)"> 前期服务费:</label>
+                  <select name="preperiodtypeselect" class="form-control" style="width: 50%" :disabled="!serviceoverdue.preperiod" @change="selectChange($event,'serviceoverdue','preperiodtype')">
+                    <option value="">请选择</option>
+                    <option v-for="item,index in serviceoverdue.preperiodtypearray" :value="item.value" v-text="item.text" :selected="item.value===serviceoverdue.preperiodtype"></option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="font-noraml" for="staging"><input id="staging" type="checkbox" name="servicemoneyrule" v-model="serviceoverdue.staging" @change="stagingchange($event)"> 分期服务费:</label>
+                  <select name="stagingselect" class="form-control" style="width: 50%" :disabled="!serviceoverdue.staging" @change="selectChange($event,'serviceoverdue','stagingtype')">
+                    <option value="">请选择</option>
+                    <option v-for="item,index in serviceoverdue.stagingtypearray" :value="item.value" v-text="item.text" :selected="item.value===serviceoverdue.stagingtype"></option>
+                  </select>
+                </div>
+                <h4>逾期收费规则</h4>
+                <div class="form-group">
+                  <label class="font-noraml" for="perin"><input id="perin" type="checkbox" name="perincheckbox" v-model="serviceoverdue.perin" @change="perinchange($event)"> 罚息</label>
+                  <label class="font-noraml" for="beofcon"><input id="beofcon" type="checkbox" name="overduecheckbox" v-model="serviceoverdue.beofcon" @change="beofconchange($event)"> 违约金</label>
+                </div>
+                <div class="form-group" v-if="serviceoverdue.perin">
+                  <label class="font-noraml">罚息:</label>
+                  <select name="perintypeselect" class="form-control" style="width: 50%" :disabled="!serviceoverdue.perin" @change="selectChange($event,'serviceoverdue','perintype')">
+                    <option value="">请选择</option>
+                    <option v-for="item,index in serviceoverdue.perintypearray" :value="item.value" v-text="item.text" :selected="item.value===serviceoverdue.perintype"></option>
+                  </select>
+                </div>
+                <div class="form-group" v-if="serviceoverdue.perin">
+                  <label class="font-noraml">收取频率:</label>
+                  <select name="refreperinselect" class="form-control" style="width: 50%" :disabled="!serviceoverdue.perin" @change="selectChange($event,'serviceoverdue','perinturn')">
+                    <option value="">请选择</option>
+                    <option v-for="item,index in serviceoverdue.perinturnarray" :value="item.value" v-text="item.text" :selected="item.value===serviceoverdue.perinturn"></option>
+                  </select>
+                </div>
+                <div class="form-group" v-if="serviceoverdue.beofcon">
+                  <label class="font-noraml">违约金:</label>
+                  <select name="overdueselect" class="form-control" style="width: 50%" :disabled="!serviceoverdue.beofcon" @change="selectChange($event,'serviceoverdue','beofcontype')">
+                    <option value="">请选择</option>
+                    <option v-for="item,index in serviceoverdue.beofcontypearray" :value="item.value" v-text="item.text" :selected="item.value===serviceoverdue.beofcontype"></option>
+                  </select>
+                </div>
+                <div class="form-group" v-if="serviceoverdue.beofcon">
+                  <label class="font-noraml">收取频率:</label>
+                  <select name="refreoverdueselect" class="form-control" style="width: 50%" :disabled="!serviceoverdue.beofcon" @change="selectChange($event,'serviceoverdue','beofconturn')">
+                    <option value="">请选择</option>
+                    <option v-for="item,index in serviceoverdue.beofconturnarray" :value="item.value" v-text="item.text" :selected="item.value===serviceoverdue.beofconturn"></option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div :class="showother?'col-sm-3':'col-sm-3 hide'">
+          <div class="ibox float-e-margins">
+            <div class="ibox-title">
+              <h5>提前结清、还款顺序规则</h5>
+            </div>
+            <div class="ibox-content">
+              <div class="form-inline">
+                <h4>提前结清规则</h4>
+                <div class="form-group">
+                  <label class="font-noraml" style="line-height: 34px">提前结清金额:</label>
+                  <select name="advanceselect" class="form-control" style="width: 100%" @change="advancetypechange($event)">
+                    <option value="">请选择</option>
+                    <option v-for="item,index in advancerepayturn.advancetypearray" :value="item.value" v-text="item.text" :selected="item.value===advancerepayturn.advancetype"></option>
+                  </select>
+                </div>
+                <div class="form-group" v-if="advancerepayturn.advbeofcon">
+                  <label class="font-noraml">违约金:</label>
+                  <select name="advbeofcontselect" class="form-control" style="width: 50%" @change="selectChange($event,'advancerepayturn','advbeofcontype')">
+                    <option value="">请选择</option>
+                    <option v-for="item,index in advancerepayturn.advbeofcontypearray" :value="item.value" v-text="item.text" :selected="item.value===advancerepayturn.advbeofcontype"></option>
+                  </select>
+                </div>
+                <div class="form-group" v-if="advancerepayturn.advreturn">
+                  <label class="font-noraml">退还费用:</label>
+                  <select name="advreturnselect" class="form-control" style="width: 50%" @change="selectChange($event,'advancerepayturn','advreturntype')">
+                    <option value="">请选择</option>
+                    <option v-for="item,index in advancerepayturn.advreturntypearray" :value="item.value" v-text="item.text" :selected="item.value===advancerepayturn.advreturntype"></option>
+                  </select>
+                </div>
+                <h4>还款顺序</h4>
+                <div class="form-group">
+                  <select name="repayturnselect" class="form-control" style="width: 100%" @change="selectChange($event,'advancerepayturn','repaymentturn')">
+                    <option value="">请选择</option>
+                    <option v-for="item,index in advancerepayturn.repaymentturnarray" :value="item.value" v-text="item.text" :selected="item.value===advancerepayturn.repaymentturn"></option>
+                  </select>
+                </div>
+              </div>
+              <a href="javascript:;" class="showother btn btn-white" v-show="showother" @click="showother=false"><i class="fa fa-chevron-left"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="foottool" class="col-sm-12">
+        <div class="text-center m-t">
+          <a class="btn btn-white" id="cancelbtn" href="javascript:;" @click="cancelClick">取 消</a>
+          <a class="btn btn-primary" id="nextstepbtn" href="javascript:;" @click="nextstepClick">下一步</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="js/vue.min.js"></script>
+  <script src="/js/plugins/layer/laydate/laydate.js"></script>
+  <script>
+  var vm = new Vue({
+    el:'#app',
+    data:{
+      showother:false,
+      editStatus:false,
+      base:{
+        businesstypearray:[{value:'1',text:'信贷'},{value:'2',text:'车贷'},{value:'3',text:'房贷'}],
+        businesstype:'1',
+        businesstypetext:'',
+        title:'哈哈',
+        description:'哈哈',
+        version:'1.0',
+        publictime:'',
+        downtime:'',
+        term:'1',
+        repaymenttypearray:[{value:'1',text:'等额本息'},{value:'2',text:'先息后本'},{value:'3',text:'等本等息'},{value:'4',text:'等额本金'},{value:'5',text:'一次性还本付息'},{value:'6',text:'变额还款'}],
+        repaymenttype:'1',
+        repaymenttypetext:'',
+        singlelength:'1',
+        singlelengthtypearray:[{value:'1',text:'天'},{value:'2',text:'个月'}],
+        singlelengthtype:'1',
+        singlelengthtypetext:'',
+        ps:'哈哈'
+      },
+      loansrepay:{
+        loansarttypearray:[{value:'1',text:'合同金额*放款比例'}],
+        loansarttype:'1',
+        loansarttypetext:'',
+        repaydayradio:'1',
+        newtr:{startday:'',endday:'',type:'',text:'',day:''},
+        trarray:[{startday:'1',endday:'9',type:'1',text:'',day:'1'}],
+        interesttypearray:[{value:'1',text:'计息日'},{value:'2',text:'计息日+1'},{value:'2',text:'计息日-1'}],
+        interesttype:'1',
+        interesttypetext:'',
+        interestest:false,
+        extension:false,
+      },
+      serviceoverdue:{
+        preperiod:true,
+        staging:false,
+        preperiodtypearray:[{value:'0',text:'0'},{value:'1',text:'合同金额*前期服务费率'},{value:'2',text:'月还本息*前期服务费率'}],
+        preperiodtype:'1',
+        preperiodtypetext:'',
+        stagingtypearray:[{value:'0',text:'0'},{value:'1',text:'合同金额*分期服务费率'},{value:'2',text:'月还本息*分期服务费率'}],
+        stagingtype:'',
+        perin:true,
+        beofcon:false,
+        perintypearray:[{value:'1',text:'合同金额*罚息费率'},{value:'2',text:'剩余合同金额*罚息费率'},{value:'3',text:'当期月还款*罚息费率'},{value:'4',text:'逾期本息*罚息费率'}],
+        perintype:'1',
+        perintypetext:'',
+        perinturnarray:[{value:'1',text:'每日'},{value:'2',text:'每期'}],
+        perinturn:'1',
+        perinturntext:'',
+        beofcontypearray:[{value:'1',text:'合同金额*违约金费率'},{value:'2',text:'剩余合同金额*违约金费率'},{value:'3',text:'当期月还款*违约金费率'}],
+        beofcontype:'',
+        beofcontypetext:'',
+        beofconturnarray:[{value:'1',text:'每日'},{value:'2',text:'每期'}],
+        beofconturn:'',
+        beofconturntext:'',
+      },
+      advancerepayturn:{
+        advancetypearray:[{value:'1',text:'最近一期月利息+月服务费+剩余合同金额'},{value:'2',text:'最近一期月利息+月服务费+剩余合同金额+违约金'},{value:'3',text:'最近一期月利息+月服务费+剩余合同金额-退还费用'},{value:'4',text:'最近一期月利息+月服务费+剩余合同金额+违约金-退还费用'}],
+        advancetype:'4',
+        advancetypetext:'',
+        advbeofcon:false,
+        advbeofcontypearray:[{value:'1',text:'合同金额*违约金费率'}],
+        advbeofcontype:'1',
+        advbeofcontypetext:'',
+        advreturn:false,
+        advreturntypearray:[{value:'1',text:'合同金额*退还费率'}],
+        advreturntype:'1',
+        advreturntypetext:'',
+        repaymentturnarray:[{value:'1',text:'服务费→违约金→罚息→利息→本金'},{value:'2',text:'本金→服务费→利息→罚息→违约金'}],
+        repaymentturn:'1',
+        repaymentturntext:'',
+      }
+    },
+    mounted:function(){
+      this.initLayerData();
+      this.initTextSelect();
+    },
+    methods:{
+      initLayerData(){
+        //日期控件
+        var that = this;
+        var productpublictime = {
+            elem: '#productpublictime',
+            format: 'YYYY/MM/DD hh:mm:ss',
+            max: laydate.now(), //最大日期
+            istime: true,
+            istoday: false,
+            choose: function (datas) {
+                that.base.publictime = datas;
+            }
+        };
+        var productdowntime = {
+            elem: '#productdowntime',
+            format: 'YYYY/MM/DD hh:mm:ss',
+            max: laydate.now(), //最大日期
+            istime: true,
+            istoday: false,
+            choose: function (datas) {
+                that.base.downtime = datas;
+            }
+        };
+        laydate(productpublictime);
+        laydate(productdowntime);
+      },
+      initTextSelect:function(){
+        var arr=['base.businesstype','base.repaymenttype','base.singlelengthtype','loansrepay.loansarttype','loansrepay.interesttype','serviceoverdue.preperiodtype','serviceoverdue.stagingtype','serviceoverdue.perintype','serviceoverdue.perinturn','serviceoverdue.beofcontype','serviceoverdue.beofconturn','advancerepayturn.advancetype','advancerepayturn.advbeofcontype','advancerepayturn.advreturntype','advancerepayturn.repaymentturn'],s,d,result,that=this;
+        for(var i=0,l=arr.length;i<l;i++){
+          s=arr[i].split('.')[0];
+          d=arr[i].split('.')[1];
+          result = that[s][d+'array'].filter(function(it){
+            return it.value === that[s][d];
+          })[0];
+          that[s][d+'text'] = (result&&result.text)||'';
+        }
+        if(that.loansrepay.repaydayradio==='1'){
+          for(var i=0;i<that.loansrepay.trarray.length;i++){
+            var it = this.loansrepay.trarray[i];
+            it.text = ['','本月','次月'][it.type]||'';
+          }
+        }
+      },
+      editClick:function(){
+        alert('修改')
+      },
+      selectChange:function(e,s,d){
+        this[s][d] = e.target.value;
+        var result = this[s][d+'array'].filter(function(it){
+          return it.value === e.target.value;
+        })[0];
+        this[s][d+'text'] = (result&&result.text)||'';
+      },
+      trtypechange:function(e,i){
+        this.loansrepay.trarray[i].type = e.target.value;
+        this.loansrepay.trarray[i].text = ['','本月','次月'][e.target.value]||'';
+      },
+      addTrClick:function(){
+        this.loansrepay.trarray.push(Object.assign({},this.loansrepay.newtr));
+      },
+      delTrClick:function(i){
+        this.loansrepay.trarray.splice(i,1);
+      },
+      preperiodchange:function(e){
+        if(!e.target.checked){
+          this.serviceoverdue.preperiodtype = '';
+        }
+      },
+      stagingchange:function(e){
+        if(!e.target.checked){
+          this.serviceoverdue.stagingtype = '';
+        }
+      },
+      perinchange:function(e){
+        if(!e.target.checked){
+          this.serviceoverdue.perintype = '';
+          this.serviceoverdue.perinturn = '';
+        }
+      },
+      beofconchange:function(e){
+        if(!e.target.checked){
+          this.serviceoverdue.beofcontype = '';
+          this.serviceoverdue.beofconturn = '';
+        }
+      },
+      advancetypechange:function(e){
+        this.advancerepayturn.advancetype = e.target.value;
+        switch(this.advancerepayturn.advancetype){
+          case '1':
+            this.advancerepayturn.advbeofcon = false;
+            this.advancerepayturn.advreturn = false;
+          break;
+          case '2':
+            this.advancerepayturn.advbeofcon = true;
+            this.advancerepayturn.advreturn = false;
+          break;
+          case '3':
+            this.advancerepayturn.advbeofcon = false;
+            this.advancerepayturn.advreturn = true;
+          break;
+          case '4':
+            this.advancerepayturn.advbeofcon = true;
+            this.advancerepayturn.advreturn = true;
+          break;
+          default:
+            this.advancerepayturn.advbeofcon = false;
+            this.advancerepayturn.advreturn = false;
+          break;
+        }
+        this.advancerepayturn.advbeofcontype = '';
+        this.advancerepayturn.advreturntype = '';
+        this.advancerepayturn.advancetypetext = this.advancerepayturn.advancetypearray.filter(function(it){
+          return it.value === e.target.value;
+        })[0].text;
+      },
+      cancelClick:function(){
+        alert('取消')
+      },
+      nextstepClick:function(){
+        console.log(this._data)
+        alert(JSON.stringify(this._data))
+      }
+    }
+  })
+  </script>
+</body>
+</html>

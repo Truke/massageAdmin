@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>民信</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <link href="css/bootstrap.min.css?v=3.4.0" rel="stylesheet">
+    <link href="css/font-awesome.min.css?v=4.3.0" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css?v=3.2.0" rel="stylesheet">
+    <link href="css/plugins/jqgrid/ui.jqgrid.css?0820" rel="stylesheet">
+    <style>
+        .fileBtn{
+            position: relative;
+        }
+        .fileInput{
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            top:0;
+        }
+    </style>
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-12">
+                <form action="post" id="addContractForm">
+                    <div class="ibox float-e-margins">
+                        <div class="ibox-title bt_min_h40">
+                            <h5>合同模板</h5>
+                        </div>
+                        <div class="ibox-content clearfix text-center">
+                            <div class="form-inline">
+                                <div class="search-content-box clearfix">
+                                    <div class="form-group col-sm-3">
+                                        <label class="font-noraml">合同名称:</label>
+                                        <input id="contractname" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="jqGrid_wrapper_box">
+                        <div class="jqGrid_wrapper">
+                            <table id="table_list_1"></table>
+                        </div>
+                    </div>
+                    <div class="text-center m-t">
+                        <a class="btn btn-white" id="cancelbtn" href="javascript:;">取 消</a>
+                        <a class="btn btn-primary" id="surebtn" href="javascript:;">确 认</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- 全局js -->
+    <script src="js/jquery-2.1.1.min.js"></script>
+    <!-- jqGrid -->
+    <script src="js/plugins/jqgrid/i18n/grid.locale-cn.js?0820"></script>
+    <script src="js/plugins/jqgrid/jquery.jqGrid.min.js?0820"></script>
+    <!-- table -->
+    <script>
+    $(document).ready(function () {
+        var mydata = [
+            {
+                type: "1",
+                file: null,
+                action: {
+                    add:true,
+                    del:false
+                }
+            }
+        ];
+        var objectFiles = {
+            html:{
+                default:"<div><button type='button' class='btn fileBtn'>选择文件<input type='file' class='fileInput' name='files[]' /></button></div>",
+                havevalue:"<div><span>{filename}</span><span>（{filesize}）</span><a title='删除' class='fileDelBtn btn btn-white btn-bitbucket'>删除</a></div>"
+            },
+            render:function(n,file){
+                var that = this,
+                    newfile = {};
+                if(file){
+                    newfile.html = that.html.havevalue.replace(/\{filename\}/,file.name).replace(/\{filesize\}/,bytesToSize(file.size)).replace(/\{n\}/g,n);
+                    mydata[n].file = file;
+                }else{
+                    newfile.html = that.html.default.replace(/\{n\}/g,n);
+                    mydata[n]&&(mydata[n].file = null);
+                }
+                $('.fileCell').eq(n).html(newfile.html);
+                return newfile;
+            }
+        }
+        function reloadMydata(){
+            //定义添加 删除 按钮的显示规则
+            if(mydata.length === 1){
+                mydata[0].action = {add:true,del:false}
+            }else{
+                for(var i=0,l=mydata.length;i<l;i++){
+                    if(i===l-1){
+                        mydata[l-1].action = {add:true,del:true}
+                    }else{
+                        mydata[i].action = {add:false,del:true}
+                    }
+                }
+            }
+            $("#table_list_1").trigger('reloadGrid');
+        }
+        $("#table_list_1").jqGrid({
+            styleUI: 'Bootstrap',
+            data: mydata,
+            datatype: "local",
+            autowidth: true,
+            height: 'auto',
+            shrinkToFit: true,
+            colNames: ['合同模板类型', '文件', '操作'],
+            colModel: [
+                {
+                    name: 'type',
+                    title: false,
+                    formatter:function(cellvalue, options, rowObject){
+                        var detail = "",
+                            menu= [],
+                            ops = [
+                                {value:'1',text:'借款协议'},
+                                {value:'2',text:'服务协议'},
+                                {value:'3',text:'委托划扣授权书'},
+                                {value:'4',text:'数字证书'}
+                            ];
+                        for(var i=0,l=ops.length;i<l;i++){
+                            menu.push("<option value='"+ops[i].value+"' "+(rowObject.type===ops[i].value?"selected":"")+">"+ops[i].text+"</option>");
+                        }
+                        detail=["<select class='selectType form-control' style='width:50%;margin: 0 auto;'>",menu[0],menu[1],menu[2],menu[3],"</select>"].join('');
+                        return detail;
+                    }
+                },
+                {
+                    name: 'file',
+                    classes: 'fileCell',
+                    title: false,
+                    formatter:function(cellvalue, options, rowObject){
+                        return objectFiles.render(options.rowId-1,rowObject.file).html;
+                    }
+                },
+                {
+                    name: 'action',
+                    width: 150,
+                    fixed: true,
+                    title: false,
+                    classes:'contract-td-visible',
+                    formatter:function(cellvalue, options, rowObject){
+                        var detail = "", menu = [];
+                        menu.push("<a title='添加' class='addrow btn btn-white btn-outline' href='javascript:;'>添加</a>");
+                        if(rowObject.action.del){
+                            menu.push("<a title='删除' class='delrow btn btn-white btn-outline' href='javascript:;'>删除</a>");
+                        }
+                        detail=["<div class='btn-group contract-btnbox'>",menu[0],menu[1],"</div>"].join('');
+                        return detail;
+                    }
+                }
+            ],
+            rownumbers:true,
+        })
+        initGridWidth();
+        function initGridWidth(){
+            var width = $('#table_list_1').parents('.jqGrid_wrapper').width();
+            $('#table_list_1').setGridWidth(width);
+        }
+        $(window).bind('resize', initGridWidth);
+        //绑定事件
+        $(document).on('change','.selectType',function(e){//合同模板类型选择
+            var index = $(this).index('#table_list_1 .selectType');
+            $(this).find('option[value='+this.value+']').attr('selected',true).siblings().removeAttr('selected');
+            mydata[index].type = this.value;
+        }).on('change','.fileInput',function(e){//选择文件
+            var index = $(this).parents('.fileCell').index('#table_list_1 .fileCell');
+            objectFiles.render(index,this.files[0]);
+        }).on('click','.fileDelBtn',function(){//删除文件
+            var index = $(this).parents('.fileCell').index('#table_list_1 .fileCell');
+            objectFiles.render(index,null);
+        }).on('click','.addrow',function(){//插入一条协议
+            var rid = $(this).index('#table_list_1 .addrow');
+            var newdata = {
+                type: "1",
+                file: null,
+                action: {
+                    add:true,
+                    del:true
+                }
+            };
+            mydata.splice(rid+1,0,newdata);
+            reloadMydata();
+        }).on('click','.delrow',function(){//删除协议
+            var rid = $(this).index('#table_list_1 .delrow');
+            mydata.splice(rid,1);
+            reloadMydata();
+        }).on('click','#surebtn',function(){//提交
+            var formData = new FormData();
+            for(var i=0,l=mydata.length;i<l;i++){
+                formData.append('files[]',mydata[i].file);
+            }
+            alert('formdata方式提交，当前数据'+JSON.stringify(mydata))
+            /*$.ajax({
+                url: 'http://localhost/admin/upload/thumb/',
+                type: 'POST',
+                data: formData,
+                async: false,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function(data) {
+                    console.log(data)
+                },
+                error: function(data) {
+                    
+                }
+            })*/
+
+            //alert('当前数据'+JSON.stringify(mydata))
+
+        }).on('click','#cancelbtn',function(){//取消
+            mydata.length = 1;
+            mydata[0] = {
+                type: "1",
+                file: null,
+                action: {
+                    add:true,
+                    del:false
+                }
+            }
+            reloadMydata();
+        })
+        //文件大小转码
+        function bytesToSize(bytes) {
+            if (bytes === 0) return '0 B';
+            var k = 1000, // or 1024
+                sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
+                i = Math.floor(Math.log(bytes) / Math.log(k));
+           return (bytes / Math.pow(k, i)).toPrecision(3) + ' ' + sizes[i];
+        }
+    })
+</script>
+</body>
+</html>

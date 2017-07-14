@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>民信</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <link href="css/bootstrap.min.css?v=3.4.0" rel="stylesheet">
+    <link href="css/font-awesome.min.css?v=4.3.0" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css?v=3.2.0" rel="stylesheet">
+    <link href="css/plugins/jqgrid/ui.jqgrid.css?0820" rel="stylesheet">
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-12">
+                <!--查询条件-->
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title bt_min_h40">
+                        <h5>条件查询</h5>
+                    </div>
+                    <div class="ibox-content clearfix text-center">
+                        <form role="form" class="form-inline" id="searchForm">
+                            <div class="search-content-box clearfix">
+                                <div class="form-group col-sm-3">
+                                    <label class="font-noraml">合同名称:</label>
+                                    <select id="titlesInput" class="form-control" style="width: 50%">
+                                        <option value="">请选择</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="center-block search-action-box">
+                                <button type="submit" class="btn btn-primary" id="search">查询</button>
+                                <button type="reset" class="btn btn-white" id="reset">重置</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="jqGrid_wrapper_box">
+                    <div class="jqGrid_wrapper">
+                        <table id="table_list_1"></table>
+                        <div id="pager_list_1"></div>
+                    </div>
+                </div>
+                <div class="text-center m-t">
+                    <a class="btn btn-white" id="cancelbtn" href="javascript:;">取 消</a>
+                    <a class="btn btn-primary" id="submitbtn" href="javascript:;">提 交</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="conModal" tabindex="-1" role="dialog" aria-labelledby="conModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">查看合同</h4>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+                <table id="contable"></table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 全局js -->
+    <script src="js/jquery-2.1.1.min.js"></script>
+    <script src="js/bootstrap.min.js?v=3.4.0"></script>
+    <!-- jqGrid -->
+    <script src="js/plugins/jqgrid/i18n/grid.locale-cn.js?0820"></script>
+    <script src="js/plugins/jqgrid/jquery.jqGrid.min.js?0820"></script>
+    <!-- table -->
+    <script>
+    $(document).ready(function () {
+        var seeDetail,mydata = [
+            {
+                title: "房e贷",
+                version: "v1.0.0",
+                create_time: "2017/6/12 12:00:00",
+                data:[{
+                	type:'借款协议',
+                	filename:'借款协议.docx',
+                	src:''
+                },{
+                	type:'服务协议',
+                	filename:'服务协议.docx',
+                	src:''
+                }]
+            },
+            {
+                title: "车e贷",
+                version: "v1.0.0",
+                create_time: "2017/6/12 12:00:00",
+                data:[{
+                	type:'借款协议',
+                	filename:'借款协议.docx',
+                	src:''
+                }]
+            }
+        ];
+        
+        $("#table_list_1").jqGrid({
+        	styleUI: 'Bootstrap',
+            data: mydata,
+            datatype: "local",
+            height: 'auto',
+            autowidth: true,
+            shrinkToFit: true,
+            rowNum: 14,
+            rowList: [10, 20, 30],
+            colNames: ['操作', '合同名称', '合同版本号', '创建时间'],
+            colModel: [
+                {
+                    name: 'action',
+                    width: 150,
+                    fixed: true,
+                    title: false,
+                    classes:'contract-td-visible',
+                    formatter:function(cellvalue, options, rowObject){
+                        var detail = "", menu = [];
+                        menu.push("<a title='查看' class='see btn btn-white btn-outline' href='javascript:;' data-index='"+options.rowId+"'>查看</a>");
+                        detail=["<div class='btn-group contract-btnbox'>",menu[0],menu[1],"</div>"].join('');
+                        return detail;
+                    }
+                },
+                {
+                    name: 'title'
+                },
+                {
+                    name: 'version'
+                },
+                {
+                    name: 'create_time'
+                }
+            ],
+            pager: "#pager_list_1",
+            multiselect : true,
+            multiboxonly: true,
+            onSelectRow: function(id,state) {
+                var ids = $("#table_list_1").jqGrid('getGridParam','selarrrow');
+                console.log(ids,id,state)
+            },
+            gridComplete: function(){
+            	$("#cb_table_list_1").hide();
+            	$("#table_list_1").find(':checkbox').attr('type','radio');
+            	return true;
+            },
+            beforeSelectRow:function(){
+            	$("#table_list_1").jqGrid('resetSelection');
+            	return true;
+            }
+        })
+        initGridWidth();
+        function initGridWidth(){
+            var width = $('#table_list_1').parents('.jqGrid_wrapper').width();
+            $('#table_list_1').setGridWidth(width);
+        }
+        $(window).bind('resize', initGridWidth);
+
+        
+        //绑定事件
+        $(document).on('submit','#searchForm',function(){
+        	alert('查询')
+            //do something
+            return false;
+        }).on('click','#pausebtn,#prevbtn,#submitbtn',function(e){
+            var e = e || window.event,
+                dom = e.target || e.srcElement,
+                ids = $("#table_list_1").jqGrid('getGridParam','selarrrow');
+            switch(dom.id){
+                case 'pausebtn':
+                	alert('暂存')
+                break;
+                case 'prevbtn':
+                    alert('上一步')
+                break;
+                case 'submitbtn':
+                    alert('提交')
+                break;
+                default:
+                break;
+            }
+        }).on('click','.see',function(){
+            var id = $(this).data('index');
+            $('#conModal').attr('data-id',id).modal();
+        }).on('shown.bs.modal','#conModal',function(e){
+            var id = e.target.dataset.id;
+            $('#contable').jqGrid({
+                styleUI: 'Bootstrap',
+                datatype: "local",
+                autowidth: true,
+                shrinkToFit: true,
+                colNames:['合同模板类型', '文件'],
+                colModel:[
+                    {
+                        name:'type',
+                    },
+                    {
+                        name: 'filename'
+                    }
+                ]
+            })
+            $("#contable").jqGrid("clearGridData").jqGrid('setGridParam',{
+                data:mydata[id-1].data
+            }).trigger('reloadGrid')
+        })
+    })
+</script>
+</body>
+</html>

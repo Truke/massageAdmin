@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>民信</title>
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <link href="css/bootstrap.min.css?v=3.4.0" rel="stylesheet">
+  <link href="css/font-awesome.min.css?v=4.3.0" rel="stylesheet">
+  <link href="css/animate.css" rel="stylesheet">
+  <link href="css/style.css?v=3.2.0" rel="stylesheet">
+  <style>
+  .col-sm-3 {
+    width: 20%;
+  }
+  
+  .form-inline .form-group {
+    margin-bottom: 10px;
+    width: 100%;
+  }
+  
+  .form-inline label {
+    min-width: 8em;
+  }
+  
+  .takeupitem .form-inline {
+    min-height: 120px;
+  }
+  
+  .takebackitem .form-inline {
+    min-height: 162px;
+  }
+  
+  .checkbox input[type=text]:disabled {
+    background-color: transparent;
+  }
+  
+  .discheck {
+    color: #aaa;
+  }
+  
+  .item {
+    position: relative;
+    padding: 10px;
+    background-color: #fff;
+    margin-bottom: 20px;
+  }
+  
+  .item .itembtngroup {
+    position: absolute;
+    left: 0;
+    top: 40%;
+    margin-top: -10px;
+    z-index: 1;
+  }
+  
+  .item .dropdown-menu {
+    min-width: auto;
+    left: 20px;
+    top: 40%;
+    margin-top: -30px;
+    font-size: 0;
+  }
+  
+  .item .dropdown-menu li {
+    display: inline-block;
+    width: 50%;
+    font-size: 12px;
+  }
+  
+  .item .dropdown-menu li:last-child {
+    display: block;
+    width: 100%;
+  }
+  
+  .item .dropdown-menu li a {
+    padding: 3px;
+    margin: 0;
+    text-align: center;
+  }
+  
+  .item .itembtngroup:hover .dropdown-menu {
+    display: block;
+  }
+  </style>
+</head>
+
+<body class="gray-bg">
+  <div id="app2" class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="toolbar space-15">
+          <a href="javascript:;" class="btn btn-primary" id="takeup" @click="addItem('up')"><i class="fa fa-plus"></i> 放款</a>
+          <a href="javascript:;" class="btn btn-white" id="takeback" @click="addItem('back')"><i class="fa fa-plus"></i> 还款</a>
+        </div>
+        <div class="ibox" v-for="item,index in list">
+          <div class="takeupitem item clearfix"  v-if="item.type==='up'">
+            <div class="btn-group itembtngroup">
+              <button data-toggle="dropdown" class="btn btn-default btn-xs dropdown-toggle" aria-expanded="false"><span class="caret"></span> </button>
+              <ul class="dropdown-menu">
+                <li><a class="addItem" href="javascript:;" @click="addItem('up',index)"><i class="fa fa-plus"></i></a> </li>
+                <li><a class="delItem" href="javascript:;" @click="delItem('up',index)"><i class="fa fa-minus"></i></a> </li>
+                <li><a class="copyItem" href="javascript:;" @click="copyItem(index)">复制并新增</a> </li>
+              </ul>
+            </div>
+            <div class="form-inline col-sm-3 b-r">
+              <h4>放款规则</h4>
+              <div class="form-group">
+                <label class="font-noraml">放款比例:</label>
+                <input type="text" name="loansartprecent" class="form-control" style="width: 40%" v-model="item.loansartprecent"> % </div>
+            </div>
+            <div class="form-inline col-sm-3">
+              <h4>前期服务费规则</h4>
+              <div class="form-group">
+                <label class="font-noraml">前期服务费率:</label>
+                <input type="text" name="preperiodprecent" class="form-control" style="width: 40%" v-model="item.preperiodprecent"> % </div>
+              <div :class="item.minpreartboolean?'form-group checkbox':'form-group checkbox discheck'">
+                <label class="font-noraml">
+                  <input name="minpreartboolean" type="checkbox" v-model="item.minpreartboolean"> 最低收费金额: </label>
+                <input type="text" name="mintakeupmoneyInput" class="form-control" style="width: 40%" v-model="item.minprearttext" :disabled='!item.minpreartboolean'> 元 </div>
+            </div>
+          </div>
+          <div class="takebackitem item clearfix" v-if="item.type==='back'">
+            <div class="btn-group itembtngroup">
+              <button data-toggle="dropdown" class="btn btn-default btn-xs dropdown-toggle" aria-expanded="false"><span class="caret"></span> </button>
+              <ul class="dropdown-menu">
+                <li><a class="addItem" href="javascript:;" @click="addItem('back',index)"><i class="fa fa-plus"></i></a> </li>
+                <li><a class="delItem" href="javascript:;" @click="delItem('back',index)"><i class="fa fa-minus"></i></a> </li>
+                <li><a class="copyItem" href="javascript:;" @click="copyItem(index)">复制并新增</a> </li>
+              </ul>
+            </div>
+            <div class="form-inline col-sm-3 b-r">
+              <h4>阶段分类（期）</h4>
+              <div class="form-group">
+                <label class="font-noraml">第{{item.backindex}}阶段:</label>
+                共 <input type="text" name="stepnum" class="form-control" style="width: 30%" v-model="item.stepnum"> 期</div>
+            </div>
+            <div class="form-inline col-sm-3 b-r">
+              <h4>本息规则</h4>
+              <div class="form-group">
+                <label class="font-noraml">还款方式:</label>
+                <select name="repaymenttype" class="form-control" style="width: 40%" @change="selectChange($event,'repaymenttype',index)">
+                  <option value="">请选择</option>
+                  <option v-for="it,index in item.repaymenttypearray" :value="it.value" v-text="it.text" :selected="it.value===item.repaymenttype"></option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="font-noraml">月利率:</label>
+                <input type="text" name="monthlyrate" class="form-control" style="width: 40%" v-model="item.monthlyrate"> % </div>
+              <div class="form-group">
+                <label class="font-noraml">利息收取规则:</label>
+                <select name="incoruletype" class="form-control" style="width: 40%" @change="selectChange($event,'incoruletype',index)">
+                  <option value="">请选择</option>
+                  <option v-for="it,index in item.incoruletypearray" :value="it.value" v-text="it.text" :selected="it.value===item.incoruletype"></option>
+                </select>
+              </div>
+            </div>
+            <div class="form-inline col-sm-3 b-r">
+              <h4>分期服务费规则</h4>
+              <div class="form-group">
+                <label class="font-noraml">分期服务费率:</label>
+                <input type="text" name="fenqifuwufeilv" class="form-control" style="width: 40%" v-model="item.stagingprecent"> % </div>
+              <div :class="item.minstagartboolean?'form-group checkbox':'form-group checkbox discheck'">
+                <label class="font-noraml">
+                  <input name="minstagartboolean" type="checkbox" v-model="item.minstagartboolean"> 最低收费金额: </label>
+                <input type="text" name="minstagarttext" class="form-control" style="width: 40%" v-model="item.minstagarttext" :disabled="!item.minstagartboolean"> 元 </div>
+              <div class="form-group">
+                <label class="font-noraml">服务费收取规则:</label>
+                <select name="sefecoruletype" class="form-control" style="width: 40%" @change="selectChange($event,'sefecoruletype',index)">
+                  <option value="">请选择</option>
+                  <option v-for="it,index in item.sefecoruletypearray" :value="it.value" v-text="it.text" :selected="it.value===item.sefecoruletype"></option>
+                </select>
+              </div>
+            </div>
+            <div class="form-inline col-sm-3 b-r">
+              <h4>提前结清规则</h4>
+              <div class="form-group">
+                <label class="font-noraml">违约金费率:</label>
+                <input type="text" name="advbeofcont" class="form-control" style="width: 40%" v-model="item.advbeofcont"> % </div>
+              <div :class="item.minadvbeofartboolean?'form-group checkbox':'form-group checkbox discheck'">
+                <label class="font-noraml">
+                  <input type="checkbox" v-model="item.minadvbeofartboolean"> 最低收费金额: </label>
+                <input type="text" name="advbeofarttext" class="form-control" style="width: 40%" v-model="item.minadvbeofarttext" :disabled="!item.minadvbeofartboolean"> 元 </div>
+            </div>
+            <div class="form-inline col-sm-3">
+              <h4>逾期收费规则</h4>
+              <div class="form-group">
+                <label class="font-noraml">罚息费率:</label>
+                <input type="text" name="overpreinprecent" class="form-control" style="width: 40%" v-model="item.overpreinprecent"> % </div>
+              <div class="form-group">
+                <label class="font-noraml">违约金费率:</label>
+                <input type="text" name="overbeofconprecent" class="form-control" style="width: 40%" v-model="item.overbeofconprecent"> % </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="foottool" class="col-sm-12">
+        <div class="bottomtoolbar text-center m-t" :class="list.length>0?'':'hide'">
+          <a class="btn btn-white" id="cancelbtn" href="javascript:;">取 消</a>
+          <a class="btn btn-white" id="prevbtn" href="javascript:;">上一步</a>
+          <a class="btn btn-primary" id="donebtn" href="javascript:;">配置完成</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="js/vue.min.js"></script>
+  <script>
+  var vm = new Vue({
+    el: '#app2',
+    data: {
+      takeupdata: {
+        type:'up',
+        loansartprecent: '',
+        preperiodprecent: '',
+        minpreartboolean: false,
+        minprearttext: ''
+      },
+      takebackdata: {
+        type:'back',
+        backindex:0,
+        repaymenttypearray: [{
+          value: '1',
+          text: '等额本息'
+        }, {
+          value: '2',
+          text: '先息后本'
+        }, {
+          value: '3',
+          text: '等本等息'
+        }, {
+          value: '4',
+          text: '等额本金'
+        }, {
+          value: '5',
+          text: '一次性还本付息'
+        }, {
+          value: '6',
+          text: '变额还款'
+        }],
+        repaymenttype: '',
+        monthlyrate: '',
+        incoruletypearray: [{
+          value: '1',
+          text: '期初'
+        }, {
+          value: '2',
+          text: '期末'
+        }],
+        incoruletype: '',
+        stagingprecent: '',
+        minstagartboolean: false,
+        minstagarttext: '',
+        sefecoruletypearray: [{
+          value: '1',
+          text: '期初'
+        }, {
+          value: '2',
+          text: '期末'
+        }],
+        sefecoruletype: '',
+        advbeofcont: '',
+        minadvbeofartboolean: false,
+        minadvbeofarttext: '',
+        overpreinprecent: '',
+        overbeofconprecent: '',
+      },
+      list: [],
+    },
+    mounted: function() {
+
+    },
+    methods: {
+      selectChange: function(e, d, i) {
+        this.list[i][d] = e.target.value;
+      },
+      addItem: function(t,i) {
+        if(typeof i !== 'undefined'){
+          this.list.splice(i + 1, 0, Object.assign({}, this['take'+t+'data']));
+        }else{
+          this.list.push(Object.assign({},this['take'+t+'data']));
+        }
+      },
+      delItem: function(t,i) {
+        this.list.splice(i, 1);
+      },
+      copyItem: function(i) {
+        this.list.splice(i + 1, 0, Object.assign({}, this.list[i]));
+      }
+    },
+    watch:{
+      list:{
+        handler:function(newval){
+          var j=1;
+          for(var i=0,l=newval.length;i<l;i++){
+            if(newval[i].type==='back'){
+              newval[i].backindex = j++;
+            }
+          }
+        }
+      }
+    }
+  })
+  </script>
+</body>
+
+</html>

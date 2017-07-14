@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>民信</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <link href="css/bootstrap.min.css?v=3.4.0" rel="stylesheet">
+    <link href="css/font-awesome.min.css?v=4.3.0" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css?v=3.2.0" rel="stylesheet">
+    <link href="css/plugins/jqgrid/ui.jqgrid.css?0820" rel="stylesheet">
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-12">
+                <!--查询条件-->
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title bt_min_h40">
+                        <h5>条件查询</h5>
+                    </div>
+                    <div class="ibox-content clearfix text-center">
+                        <form role="form" class="form-inline" id="searchForm">
+                            <div class="search-content-box clearfix">
+                                <div class="form-group col-sm-3">
+                                    <label class="font-noraml">产品类型:</label>
+                                    <input id="typeInput" class="form-control">
+                                </div>
+                                <div class="form-group col-sm-3">
+                                    <label class="font-noraml">产品名称:</label>
+                                    <input id="titleInput" class="form-control">
+                                </div>
+                                <div class="form-group col-sm-3">
+                                    <label class="font-noraml">版本号:</label>
+                                    <input id="versionInput" class="form-control">
+                                </div>
+                                <div class="form-group col-sm-3">
+                                    <label class="font-noraml">状态:</label>
+                                    <select id="statusInput" class="form-control" style="width: 50%">
+                                        <option value="">请选择</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="center-block search-action-box">
+                                <button type="submit" class="btn btn-primary" id="search">查询</button>
+                                <button type="reset" class="btn btn-white" id="reset">重置</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="toolbar space-15">
+                    <a href="javascript:;" class="btn btn-primary" id="create">创建</a>
+                    <a href="javascript:;" class="btn btn-white" id="public">发布</a>
+                    <a href="javascript:;" class="btn btn-white" id="down">下架</a>
+                    <a href="javascript:;" class="btn btn-white" id="copyadd">复制并新增</a>
+                    <a href="javascript:;" class="btn btn-white" id="tryadd">试算并新增</a>
+                </div>
+                <div class="jqGrid_wrapper_box">
+                    <div class="jqGrid_wrapper">
+                        <table id="table_list_1"></table>
+                        <div id="pager_list_1"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="assosModal" tabindex="-1" role="dialog" aria-labelledby="assosModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">关联合同</h4>
+          </div>
+          <div class="modal-body">
+            <div class="row m-b">
+                <div class="col-sm-4"><strong>合同名称：</strong>房e贷合同</div>
+                <div class="col-sm-4"><strong>合同版本号：</strong>V1.0</div>
+            </div>
+            <table id="assosinfo"></table>
+            <div class="row m-t m-b">
+                <div class="col-sm-4"><strong>关联历史：</strong></div>
+            </div>
+            <table id="assoshistory"></table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 全局js -->
+    <script src="js/jquery-2.1.1.min.js"></script>
+    <script src="js/bootstrap.min.js?v=3.4.0"></script>
+    <!-- jqGrid -->
+    <script src="js/plugins/jqgrid/i18n/grid.locale-cn.js?0820"></script>
+    <script src="js/plugins/jqgrid/jquery.jqGrid.min.js?0820"></script>
+    <!-- table -->
+    <script>
+    $(document).ready(function () {
+        var mydata = [
+            {
+                id: "1",
+                type: "房贷",
+                title: "房e贷",
+                version: "v1.0.0",
+                status: "未发布",
+                description: "",
+                create_time: "2017/6/12 12:00:00",
+                public_time: "2017/6/12 12:00:00",
+                down_time: "2017/6/12 12:00:00",
+                assoscontract:{
+                    title:'房e贷合同'
+                }
+            },
+            {
+                id: "2",
+                type: "车贷",
+                title: "车e贷",
+                version: "v1.0.0",
+                status: "未发布",
+                description: "",
+                create_time: "2017/6/12 12:00:00",
+                public_time: "----",
+                down_time: "----",
+                assoscontract:{
+                    title:'房e贷合同'
+                }
+            }
+        ];
+        
+        $("#table_list_1").jqGrid({
+            styleUI: 'Bootstrap',
+            data: mydata,
+            datatype: "local",
+            height: 355,
+            autowidth: true,
+            shrinkToFit: true,
+            rowNum: 14,
+            rowList: [10, 20, 30],
+            colNames: ['序号', '操作', '业务类型', '产品名称', '版本号', '状态', '产品方案描述', '创建时间', '发布时间', '下架时间', '关联合同'],
+            colModel: [
+                {
+                    name: 'id',
+                    index: 'id',
+                    width: 60,
+                    sorttype: "int"
+                },
+                {
+                    name: 'action',
+                    width: 190,
+                    fixed: true,
+                    title: false,
+                    classes:'contract-td-visible',
+                    formatter:function(cellvalue, options, rowObject){
+                        var detail = "", menu = [];
+                        menu.push("<a title='编辑' class='btn btn-white btn-outline' href=''>编辑</a>");
+                        menu.push("<a title='关联合同' class='btn btn-white btn-outline' href=''>关联合同</a>");
+                        menu.push("<a title='查看' class='btn btn-white btn-outline' href=''>查看</a>");
+                        menu.push("<a title='试算' class='btn btn-white btn-outline' href=''>试算</a>");
+                        menu.push("<a title='删除' class='btn btn-white btn-outline' href=''>删除</a>");
+                        if(menu.length<3){
+                            detail=["<div class='btn-group contract-btnbox'>",menu[0],menu[1],"</div>"].join('');
+                        }else{
+                            detail=["<div class='btn-group contract-btnbox'>",menu[0],menu[1],"<div title='更多操作' class='btn btn-white btn-outline contarct-hidebtn'><i class='fa fa-angle-double-right'></i><div class='btn-group dropdown-menu'>",menu[2],menu[3],menu[4],menu[5],"</div></div></div>"].join('');
+                        }
+                        return detail;
+                    }
+                },
+                {
+                    name: 'type'
+                },
+                {
+                    name: 'title'
+                },
+                {
+                    name: 'version'
+                },
+                {
+                    name: 'status'
+                },
+                {
+                    name: 'description'
+                },
+                {
+                    name: 'create_time'
+                },
+                {
+                    name: 'public_time'
+                },
+                {
+                    name: 'down_time'
+                },
+                {
+                    name: 'assoscontract',
+                    title: false,
+                    formatter:function(cellvalue,options,rowObject){
+                        return '<a class="seeAssos" data-id="'+rowObject.id+'"">'+rowObject.assoscontract.title+'</a>'
+                    }
+                }
+            ],
+            pager: "#pager_list_1",
+            multiselect : true,
+            onSelectRow: function(id,state) {
+                var ids = $("#table_list_1").jqGrid('getGridParam','selarrrow');
+                console.log(ids,id,state)
+            },
+            onSelectAll: function(rowids,state){
+                console.log(rowids,state)
+            }
+        })
+        initGridWidth();
+        function initGridWidth(){
+            var width = $('#table_list_1').parents('.jqGrid_wrapper').width();
+            $('#table_list_1').setGridWidth(width);
+        }
+        $(window).bind('resize', initGridWidth);
+        //绑定事件
+        $(document).on('submit','#searchForm',function(){
+            alert('查询')
+            //do something
+            return false;
+        }).on('click','#public,#down,#copyadd,#tryadd',function(e){
+            var e = e || window.event,
+                dom = e.target || e.srcElement,
+                ids = $("#table_list_1").jqGrid('getGridParam','selarrrow');
+            switch(dom.id){
+                case 'public':
+                case 'down':
+                    if(ids.length === 0){
+                        window.top.swal({
+                            title: '请选择一条数据',
+                            type: 'warning'
+                        })
+                    }else{
+                        if(dom.id === 'public'){
+                            alert('执行发布，当前选中id为：'+ids)
+                        }else if(dom.id === 'down'){
+                            alert('执行下架，当前选中id为：'+ids)
+                        }
+                    }
+                break;
+                case 'copyadd':
+                case 'tryadd':
+                    if(ids.length !== 1){
+                        window.top.swal({
+                            title: '请选择一条数据',
+                            type: 'warning'
+                        })
+                    }else{
+                        if(dom.id === 'copyadd'){
+                            alert('执行复制新增，当前选中id为：'+ids)
+                        }else if(dom.id === 'tryadd'){
+                            alert('执行试算新增，当前选中id为：'+ids)
+                        }
+                    }
+                break;
+                default:
+                break;
+            }
+        }).on('click','.seeAssos',function(){
+            var id = $(this).data('id');
+            $('#assosModal').attr('data-id',id).modal();
+        }).on('shown.bs.modal','#assosModal',function(e){
+            alert(e.target.dataset.id)
+            $('#assosinfo').jqGrid({
+                styleUI: 'Bootstrap',
+                autowidth: true,
+                shrinkToFit: true,
+                colNames:['合同模板类型', '文件'],
+                colModel:[
+                    {
+                        name:'type',
+                    },
+                    {
+                        name: 'file'
+                    }
+                ]
+            })
+            $('#assoshistory').jqGrid({
+                styleUI: 'Bootstrap',
+                autowidth: true,
+                shrinkToFit: true,
+                colNames:['序号', '时间阶段', '合同名称', '合同版本号'],
+                colModel:[
+                    {
+                        name: 'id'
+                    },
+                    {
+                        name: 'timestep'
+                    },
+                    {
+                        name:'title',
+                    },
+                    {
+                        name: 'version'
+                    }
+                ]
+            })
+        })
+    })
+</script>
+</body>
+</html>
